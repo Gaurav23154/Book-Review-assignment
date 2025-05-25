@@ -1,10 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://book-review-assignment.vercel.app';
+// Ensure the API URL doesn't end with a slash
+const API_URL = (import.meta.env.VITE_API_URL || 'https://book-review-assignment.vercel.app').replace(/\/$/, '');
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
+
+// Create axios instance with base configuration
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 const AuthContext = createContext(null);
 
@@ -23,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUserProfile();
     } else {
       setLoading(false);
@@ -32,12 +42,12 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/users/profile`);
+      const response = await api.get('/api/users/profile');
       setUser(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }
@@ -45,13 +55,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/users/login`, {
+      const response = await api.post('/api/users/login', {
         email,
         password
       });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       return user;
     } catch (error) {
@@ -62,14 +72,14 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/api/users/register`, {
+      const response = await api.post('/api/users/register', {
         username,
         email,
         password
       });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       return user;
     } catch (error) {
@@ -80,13 +90,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   const updateProfile = async (updates) => {
     try {
-      const response = await axios.put(`${API_URL}/api/users/profile`, updates);
+      const response = await api.put('/api/users/profile', updates);
       setUser(response.data);
       return response.data;
     } catch (error) {
