@@ -36,10 +36,31 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
+// MongoDB Connection Options
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  family: 4 // Use IPv4, skip trying IPv6
+};
+
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://database:tkq9HNLV87T3wFpr@namastenode.w3ufviz.mongodb.net/bookReview?retryWrites=true&w=majority&appName=NamasteNode')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    // Set up global error handler for MongoDB
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected');
+    });
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // Exit if cannot connect to database
+  });
 
 // Routes
 app.use('/api/books', require('./routes/books'));
@@ -48,8 +69,23 @@ app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('Error:', err);
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      message: 'Validation Error',
+      errors: Object.values(err.errors).map(e => e.message)
+    });
+  }
+  if (err.name === 'MongoError' && err.code === 11000) {
+    return res.status(400).json({
+      message: 'Duplicate key error',
+      field: Object.keys(err.keyPattern)[0]
+    });
+  }
+  res.status(500).json({ 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
 });
 
 // Start server

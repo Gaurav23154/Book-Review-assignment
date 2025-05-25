@@ -13,8 +13,54 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
+  },
+  timeout: 10000, // 10 seconds timeout
+  validateStatus: function (status) {
+    return status >= 200 && status < 500; // Accept all status codes less than 500
   }
 });
+
+// Add response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network Error:', error);
+      throw new Error('Network error. Please check your connection.');
+    }
+
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request Timeout:', error);
+      throw new Error('Request timeout. Please try again.');
+    }
+
+    // Handle 400 errors
+    if (error.response.status === 400) {
+      const errorMessage = error.response.data.message || 'Invalid request';
+      console.error('Bad Request:', errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // Handle 401 errors
+    if (error.response.status === 401) {
+      localStorage.removeItem('token');
+      delete api.defaults.headers.common['Authorization'];
+      throw new Error('Session expired. Please login again.');
+    }
+
+    // Handle 500 errors
+    if (error.response.status >= 500) {
+      console.error('Server Error:', error);
+      throw new Error('Server error. Please try again later.');
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 const AuthContext = createContext(null);
 
