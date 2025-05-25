@@ -113,8 +113,8 @@ npm run dev
 ```
 
 3. Access the Deployed application:
-- Frontend: `https://book-review-assignment-frontend.vercel.app/`
-- Backend API: `https://book-review-assignment.vercel.app/`
+- Frontend: [https://book-review-assignment-frontend.vercel.app/]
+- Backend API: [https://book-review-assignment.vercel.app/]
 
 ## API Endpoints
 
