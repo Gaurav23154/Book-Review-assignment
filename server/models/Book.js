@@ -27,6 +27,11 @@ const bookSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  isbn: {
+    type: String,
+    required: true,
+    unique: true
+  },
   averageRating: {
     type: Number,
     default: 0
@@ -34,6 +39,11 @@ const bookSchema = new mongoose.Schema({
   totalReviews: {
     type: Number,
     default: 0
+  },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, {
   timestamps: true

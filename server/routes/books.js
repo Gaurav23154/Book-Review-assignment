@@ -41,10 +41,13 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add a new book (admin only)
-router.post('/', adminAuth, async (req, res) => {
+// Add a new book (authenticated users)
+router.post('/', auth, async (req, res) => {
   try {
-    const book = new Book(req.body);
+    const book = new Book({
+      ...req.body,
+      addedBy: req.user._id // Add the user who created the book
+    });
     const savedBook = await book.save();
     res.status(201).json(savedBook);
   } catch (error) {
@@ -52,30 +55,44 @@ router.post('/', adminAuth, async (req, res) => {
   }
 });
 
-// Update a book (admin only)
-router.put('/:id', adminAuth, async (req, res) => {
+// Update a book (admin or book creator)
+router.put('/:id', auth, async (req, res) => {
   try {
-    const book = await Book.findByIdAndUpdate(
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    // Check if user is admin or the book creator
+    if (req.user.role !== 'admin' && book.addedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this book' });
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!book) {
-      return res.status(404).json({ message: 'Book not found' });
-    }
-    res.json(book);
+    res.json(updatedBook);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// Delete a book (admin only)
-router.delete('/:id', adminAuth, async (req, res) => {
+// Delete a book (admin or book creator)
+router.delete('/:id', auth, async (req, res) => {
   try {
-    const book = await Book.findByIdAndDelete(req.params.id);
+    const book = await Book.findById(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
+
+    // Check if user is admin or the book creator
+    if (req.user.role !== 'admin' && book.addedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this book' });
+    }
+
+    await Book.findByIdAndDelete(req.params.id);
     res.json({ message: 'Book deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
