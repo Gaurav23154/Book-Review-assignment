@@ -6,9 +6,10 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Rating,
   Box,
-  Button
+  Rating,
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -16,116 +17,144 @@ import axios from 'axios';
 const Home = () => {
   const [featuredBooks, setFeaturedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchFeaturedBooks = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/books?limit=6');
-        setFeaturedBooks(response.data.books);
-      } catch (error) {
-        console.error('Error fetching featured books:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchFeaturedBooks();
   }, []);
 
+  const fetchFeaturedBooks = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/books`, {
+        params: {
+          limit: 4,
+          sort: 'rating'
+        }
+      });
+      setFeaturedBooks(response.data.books);
+    } catch (error) {
+      setError('Failed to fetch featured books');
+      console.error('Error fetching featured books:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
-      </Container>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Welcome to Book Review
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography variant="h2" component="h1" gutterBottom>
+          Welcome to Book Reviews
         </Typography>
         <Typography variant="h5" color="text.secondary" paragraph>
-          Discover and share your thoughts on the latest books
+          Discover, review, and share your thoughts on your favorite books
         </Typography>
-      </Box>
-
-      <Typography variant="h4" component="h2" gutterBottom>
-        Featured Books
-      </Typography>
-
-      <Grid container spacing={4}>
-        {featuredBooks.map((book) => (
-          <Grid item key={book._id} xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                },
-              }}
-            >
-              <CardMedia
-                component="img"
-                height="200"
-                image={book.coverImage}
-                alt={book.title}
-              />
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography gutterBottom variant="h5" component="h2">
-                  {book.title}
-                </Typography>
-                <Typography color="text.secondary" gutterBottom>
-                  by {book.author}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Rating value={book.averageRating} precision={0.5} readOnly />
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                    ({book.totalReviews} reviews)
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                  }}
-                >
-                  {book.description}
-                </Typography>
-              </CardContent>
-              <Box sx={{ p: 2 }}>
-                <Button
-                  component={RouterLink}
-                  to={`/books/${book._id}`}
-                  variant="contained"
-                  fullWidth
-                >
-                  View Details
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Button
           component={RouterLink}
           to="/books"
-          variant="outlined"
+          variant="contained"
           size="large"
+          sx={{ mt: 2 }}
         >
-          View All Books
+          Browse Books
         </Button>
+      </Box>
+
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom align="center">
+          Featured Books
+        </Typography>
+        {error && (
+          <Typography color="error" align="center" gutterBottom>
+            {error}
+          </Typography>
+        )}
+        <Grid container spacing={4}>
+          {featuredBooks.map((book) => (
+            <Grid item xs={12} sm={6} md={3} key={book._id}>
+              <Card 
+                component={RouterLink} 
+                to={`/books/${book._id}`}
+                sx={{ 
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  textDecoration: 'none',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'scale(1.02)'
+                  }
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={book.coverImage}
+                  alt={book.title}
+                  sx={{ objectFit: 'cover' }}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography gutterBottom variant="h6" component="h3" noWrap>
+                    {book.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    by {book.author}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Rating value={book.averageRating} precision={0.5} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                      ({book.totalReviews})
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {book.genre}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Why Choose Us?
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              Discover New Books
+            </Typography>
+            <Typography color="text.secondary">
+              Find your next favorite book from our extensive collection of titles across various genres.
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              Share Your Thoughts
+            </Typography>
+            <Typography color="text.secondary">
+              Write and read reviews from a community of book lovers. Your opinion matters!
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              Track Your Reading
+            </Typography>
+            <Typography color="text.secondary">
+              Keep track of the books you've read and want to read. Build your personal reading list.
+            </Typography>
+          </Grid>
+        </Grid>
       </Box>
     </Container>
   );

@@ -3,19 +3,50 @@ const router = express.Router();
 const Book = require('../models/Book');
 const { auth, adminAuth } = require('../middleware/auth');
 
-// Get all books with pagination
+// Get all books with pagination, search, and filtering
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const genre = req.query.genre;
+    const sort = req.query.sort || 'newest';
 
-    const books = await Book.find()
+    // Build search query
+    let query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (genre) {
+      query.genre = genre;
+    }
+
+    // Build sort options
+    let sortOptions = {};
+    switch (sort) {
+      case 'oldest':
+        sortOptions = { createdAt: 1 };
+        break;
+      case 'rating':
+        sortOptions = { averageRating: -1 };
+        break;
+      case 'title':
+        sortOptions = { title: 1 };
+        break;
+      default: // newest
+        sortOptions = { createdAt: -1 };
+    }
+
+    const books = await Book.find(query)
+      .sort(sortOptions)
       .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+      .limit(limit);
 
-    const total = await Book.countDocuments();
+    const total = await Book.countDocuments(query);
 
     res.json({
       books,
