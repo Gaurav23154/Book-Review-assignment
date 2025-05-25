@@ -112,9 +112,9 @@ cd client
 npm run dev
 ```
 
-3. Access the application:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
+3. Access the Deployed application:
+- Frontend: `https://book-review-assignment-frontend.vercel.app/`
+- Backend API: `https://book-review-assignment.vercel.app/`
 
 ## API Endpoints
 
@@ -157,6 +157,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-Your Name - your.email@example.com
+Your Name - gauravjaiswal1098@gmail.com
 
-Project Link: [https://github.com/yourusername/book-review](https://github.com/yourusername/book-review) 
+Project Link: [https://github.com/Gaurav23154/Book-Review-assignment.git] 
+Deployed Link : [https://book-review-assignment-frontend.vercel.app/]
