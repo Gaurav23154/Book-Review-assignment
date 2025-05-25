@@ -1,40 +1,72 @@
 # Book Review Platform
 
-A full-stack web application for book enthusiasts to discover, review, and share their thoughts about books. Built with React, Node.js, and MongoDB.
+A full-stack web application for book enthusiasts to discover, review, and share their thoughts on books. Users can browse books, write reviews, manage their profiles, and interact with other readers.
 
 ## Features
 
-- 📚 Browse and search books
-- ⭐ Rate and review books
-- 👤 User authentication and profiles
-- 📝 Create and manage book reviews
-- 🔍 Filter books by genre and rating
-- 💬 Interactive review system
-- 📱 Responsive design for all devices
+### User Features
+- User authentication (register, login, logout)
+- User profile management
+- Browse books with advanced filtering and search
+- View detailed book information
+- Write and submit book reviews
+- Rate books (1-5 stars)
+- View other users' reviews
+- Track reading history
+
+### Book Management
+- Add new books to the platform
+- View book details including:
+  - Title, author, and description
+  - Cover image
+  - Genre and publication year
+  - Average rating and total reviews
+  - User reviews and ratings
+
+### Search and Filter
+- Search books by title or author
+- Filter books by genre
+- Sort books by:
+  - Newest first
+  - Oldest first
+  - Highest rated
+  - Title A-Z
+
+### Responsive Design
+- Mobile-friendly interface
+- Responsive grid layout
+- Optimized for all screen sizes
 
 ## Tech Stack
 
 ### Frontend
 - React.js
-- Material-UI
-- React Router
-- Axios
+- Material-UI (MUI) for UI components
+- React Router for navigation
+- Axios for API requests
 - Context API for state management
+- Vite for build tooling
 
 ### Backend
 - Node.js
 - Express.js
-- MongoDB
-- JWT Authentication
-- Mongoose ODM
+- MongoDB with Mongoose
+- JWT for authentication
+- RESTful API architecture
+
+### Development Tools
+- Git for version control
+- npm for package management
+- Environment variables for configuration
 
 ## Prerequisites
 
+Before you begin, ensure you have the following installed:
 - Node.js (v14 or higher)
-- MongoDB (local or Atlas)
+- MongoDB
 - npm or yarn
 
-## Local Development Setup
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -54,75 +86,55 @@ cd ../client
 npm install
 ```
 
-4. Create environment files:
-
-For backend (server/.env):
-```
+4. Create a `.env` file in the server directory with the following variables:
+```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-JWT_EXPIRE=30d
-NODE_ENV=development
 ```
 
-For frontend (client/.env):
-```
+5. Create a `.env` file in the client directory:
+```env
 VITE_API_URL=http://localhost:5000
 ```
 
-5. Start the development servers:
+## Running the Application
 
-Backend:
+1. Start the backend server:
 ```bash
 cd server
-npm start
+npm run dev
 ```
 
-Frontend:
+2. Start the frontend development server:
 ```bash
 cd client
 npm run dev
 ```
 
-## Deployment
-
-The application is deployed on Vercel:
-
-- Frontend: https://book-review-frontend.vercel.app
-- Backend: https://book-review-backend.vercel.app
-
-### Deployment Steps
-
-1. Backend Deployment:
-   - Install Vercel CLI: `npm install -g vercel`
-   - Deploy: `vercel`
-   - Set environment variables in Vercel dashboard
-
-2. Frontend Deployment:
-   - Install Vercel CLI: `npm install -g vercel`
-   - Deploy: `vercel`
-   - Set environment variables in Vercel dashboard
+3. Access the application:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
 
 ## API Endpoints
 
 ### Authentication
-- POST /api/users/register - Register new user
-- POST /api/users/login - User login
-- GET /api/users/profile - Get user profile
-- PUT /api/users/profile - Update user profile
+- POST /api/auth/register - Register a new user
+- POST /api/auth/login - Login user
+- GET /api/auth/profile - Get user profile
 
 ### Books
-- GET /api/books - Get all books
+- GET /api/books - Get all books (with pagination, search, and filters)
 - GET /api/books/:id - Get book details
-- POST /api/books - Create new book (admin only)
-- PUT /api/books/:id - Update book (admin only)
-- DELETE /api/books/:id - Delete book (admin only)
+- POST /api/books - Add a new book
+- PUT /api/books/:id - Update a book
+- DELETE /api/books/:id - Delete a book
 
 ### Reviews
-- GET /api/reviews/book/:bookId - Get book reviews
-- POST /api/reviews - Create new review
-- PUT /api/reviews/:id - Update review
-- DELETE /api/reviews/:id - Delete review
+- GET /api/reviews/book/:bookId - Get reviews for a book
+- POST /api/reviews - Submit a new review
+- PUT /api/reviews/:id - Update a review
+- DELETE /api/reviews/:id - Delete a review
 
 ## Contributing
 
@@ -135,6 +147,13 @@ The application is deployed on Vercel:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Material-UI for the component library
+- MongoDB for the database
+- Express.js for the backend framework
+- React.js for the frontend framework
 
 ## Contact
 
