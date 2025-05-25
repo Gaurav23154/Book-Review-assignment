@@ -39,6 +39,13 @@ const Navbar = () => {
               <Button
                 color="inherit"
                 component={RouterLink}
+                to="/add-book"
+              >
+                Add Book
+              </Button>
+              <Button
+                color="inherit"
+                component={RouterLink}
                 to="/profile"
               >
                 Profile
