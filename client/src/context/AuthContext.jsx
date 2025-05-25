@@ -1,7 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://book-review-assignment.vercel.app';
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
 
 const AuthContext = createContext(null);
 
@@ -32,6 +35,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get(`${API_URL}/api/users/profile`);
       setUser(response.data);
     } catch (error) {
+      console.error('Error fetching profile:', error);
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
     } finally {
@@ -40,28 +44,38 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const response = await axios.post(`${API_URL}/api/users/login`, {
-      email,
-      password
-    });
-    const { token, user } = response.data;
-    localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    try {
+      const response = await axios.post(`${API_URL}/api/users/login`, {
+        email,
+        password
+      });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(user);
+      return user;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const register = async (username, email, password) => {
-    const response = await axios.post(`${API_URL}/api/users/register`, {
-      username,
-      email,
-      password
-    });
-    const { token, user } = response.data;
-    localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    try {
+      const response = await axios.post(`${API_URL}/api/users/register`, {
+        username,
+        email,
+        password
+      });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(user);
+      return user;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
@@ -71,9 +85,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async (updates) => {
-    const response = await axios.put(`${API_URL}/api/users/profile`, updates);
-    setUser(response.data);
-    return response.data;
+    try {
+      const response = await axios.put(`${API_URL}/api/users/profile`, updates);
+      setUser(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Profile update error:', error);
+      throw error;
+    }
   };
 
   const value = {
