@@ -1,3 +1,4 @@
+Deployed Link - [https://book-review-assignment-frontend.vercel.app/]
 # Book Review Platform
 
 A full-stack web application for book enthusiasts to discover, review, and share their thoughts on books. Users can browse books, write reviews, manage their profiles, and interact with other readers.
